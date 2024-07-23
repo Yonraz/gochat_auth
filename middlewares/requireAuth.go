@@ -16,9 +16,8 @@ import (
 func RequireAuth(ctx *gin.Context) {
 	cookie, exists := ctx.Get("currentUserToken")
 	if !exists || cookie == nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "unauthorized",
-		})
+		fmt.Println("no user found")
+		ctx.JSON(http.StatusOK, gin.H{})
 		ctx.Abort()
 		return
 	}
@@ -66,6 +65,7 @@ func validateToken(tokenString string, ctx *gin.Context) (error) {
 		if user.ID == 0 {
 			return errors.New("unauthorized")
 		}
+		ctx.Set("currentUser", user.Username)
 	}
 
 	if err != nil {

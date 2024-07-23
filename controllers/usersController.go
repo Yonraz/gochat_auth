@@ -89,6 +89,7 @@ func Signin(ctx *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"username": user.Username,
 	})
 	JWT_KEY := os.Getenv("JWT_KEY")
 	tokenstring, err := token.SignedString([]byte(JWT_KEY))
@@ -117,13 +118,21 @@ func Signout(ctx *gin.Context) {
 	
 	// Clear the "currentUserToken" from the context
 	ctx.Set("currentUserToken", nil)
+	ctx.Set("currentUser", nil)
 	
 	// Respond to the client
 	ctx.JSON(http.StatusOK, gin.H{"message": "Signed out successfully"})
 }
 
 func CurrentUser(ctx *gin.Context) {
+	username, exists := ctx.Get("currentUser")
+	if !exists {
+		ctx.JSON(http.StatusNotFound, gin.H{
+		"message": "No user found",
+		})
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Logged in",
+		"username": username,
 	})
 }
