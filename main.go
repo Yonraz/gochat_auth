@@ -2,7 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/yonraz/gochat_auth/controllers"
 	"github.com/yonraz/gochat_auth/initializers"
+	"github.com/yonraz/gochat_auth/middlewares"
 )
 
 func init () {
@@ -15,11 +17,9 @@ func main() {
 	
 	router := gin.Default()
 
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
+	router.POST("/api/users/signup", controllers.Signup)
+	router.POST("/api/users/signin", controllers.Signin)
+	router.POST("/api/users/signout", controllers.Signout)
+	router.GET("/api/users/currentuser", middlewares.CurrentUser, middlewares.RequireAuth, controllers.CurrentUser)
 	router.Run()
 }
