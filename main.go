@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yonraz/gochat_auth/controllers"
@@ -17,7 +19,8 @@ func init () {
 }
 
 func main() {
-	
+	time.Sleep(15 * time.Second)
+	fmt.Println("Application starting...")
 	router := gin.Default()
 
 	// Defer closure of the channel and connection
