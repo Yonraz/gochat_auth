@@ -2,6 +2,7 @@ package initializers
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/streadway/amqp"
 	"github.com/yonraz/gochat_auth/constants"
@@ -13,7 +14,10 @@ var RmqConn *amqp.Connection
 
 func ConnectToRabbitmq() {
 	var err error
-	RmqConn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+	user := os.Getenv("RMQ_USER")
+	password := os.Getenv("RMQ_PASSWORD")
+	connectionString := fmt.Sprintf("amqp://%v:%v@rabbitmq:5672/", user, password)
+	RmqConn, err = amqp.Dial(connectionString)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)

@@ -34,7 +34,7 @@ func main() {
 
 	router.POST("/api/auth/signup", controllers.Signup)
 	router.POST("/api/auth/signin", controllers.Signin)
-	router.POST("/api/auth/signout", controllers.Signout)
+	router.POST("/api/auth/signout", middlewares.CurrentUser, middlewares.RequireAuth, controllers.Signout)
 	router.GET("/api/auth/currentuser", middlewares.CurrentUser, middlewares.RequireAuth, controllers.CurrentUser)
 	router.Run()
 }

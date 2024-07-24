@@ -52,7 +52,7 @@ func Signup(ctx *gin.Context) {
 
 	err = publisher.UserRegistered(body.Username)
 	if err != nil {
-		fmt.Printf("error publishing user registered event: %w", err)
+		fmt.Printf("error publishing user registered event: %v", err)
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{})
@@ -116,7 +116,7 @@ func Signin(ctx *gin.Context) {
 	ctx.SetCookie("auth", tokenstring, 3600*24*30, "", "", true, true)
 	err = publisher.UserLoggedIn(user.Username)
 	if err != nil {
-		fmt.Printf("error publishing user login event: %w", err)
+		fmt.Printf("error publishing user login event: %v", err)
 	}
 	// send back
 	ctx.JSON(http.StatusOK, gin.H{
@@ -140,7 +140,7 @@ func Signout(ctx *gin.Context) {
 		}
 		err := publisher.UserSignedout(username)
 		if err != nil {
-		fmt.Printf("error publishing user logout event: %w", err)
+		fmt.Printf("error publishing user logout event: %v", err)
 		}
 		ctx.Set("currentUser", nil)
 	}
