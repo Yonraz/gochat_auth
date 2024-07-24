@@ -20,6 +20,7 @@ func ConnectToDb() {
 	var err error
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
         host, port, user, password, dbname)
+	fmt.Println(dsn)
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Error connecting to postgres")
