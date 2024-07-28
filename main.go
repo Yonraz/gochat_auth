@@ -12,8 +12,8 @@ import (
 )
 
 func init () {
-	time.Sleep(15 * time.Second)
 	fmt.Println("Application starting...")
+	time.Sleep(1 * time.Minute)
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDb()
 	initializers.SyncDatabase()
