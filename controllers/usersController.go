@@ -27,7 +27,6 @@ func Signup(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "failed to read body",
 		})
-
 		return
 	}
 
