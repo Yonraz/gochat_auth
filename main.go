@@ -7,9 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yonraz/gochat_auth/controllers"
+	"github.com/yonraz/gochat_auth/events/utils"
 	"github.com/yonraz/gochat_auth/initializers"
 	"github.com/yonraz/gochat_auth/middlewares"
 )
+
+
+
 
 func init () {
 	fmt.Println("Application starting...")
@@ -17,7 +21,7 @@ func init () {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDb()
 	initializers.SyncDatabase()
-	initializers.ConnectToRabbitmq()
+	utils.CreateTopics(utils.Brokers, utils.Topics)
 }
 
 func main() {

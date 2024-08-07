@@ -6,5 +6,5 @@ import (
 
 func (p *Publisher) UserLoggedIn(username string) error {
 	body := map[string]string{"username": username}
-	return p.Publish(constants.UserEventsExchange, constants.UserLoggedInKey, body)
+	return p.Publish(constants.UserEventsExchange, constants.UserLoggedIn, body)
 }

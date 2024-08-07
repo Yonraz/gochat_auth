@@ -1,7 +1,7 @@
 package constants
 
 type Queues string
-type RoutingKey string
+type Topic string
 type Exchange string
 
 const (
@@ -9,9 +9,9 @@ const (
 )
 
 const (
-	UserRegisteredKey RoutingKey = "user.registered"
-	UserLoggedInKey   RoutingKey = "user.logged.in"
-	UserSignedoutKey  RoutingKey = "user.signed.out"
+	UserRegistered Topic = "user.registered"
+	UserLoggedIn   Topic = "user.logged.in"
+	UserSignedout  Topic = "user.signed.out"
 )
 
 const (

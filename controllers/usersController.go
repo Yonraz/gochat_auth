@@ -1,21 +1,22 @@
 package controllers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/yonraz/gochat_auth/events/publishers"
+	"github.com/yonraz/gochat_auth/events/producers"
+	"github.com/yonraz/gochat_auth/events/utils"
 	"github.com/yonraz/gochat_auth/initializers"
 	"github.com/yonraz/gochat_auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Signup(ctx *gin.Context) {
-	publisher := publishers.NewPublisher(initializers.RmqChannel) 
+	// publisher := publishers.NewPublisher(initializers.RmqChannel) 
 	// get email/pass/username from body
 	var body struct {
 		Email string
@@ -49,16 +50,21 @@ func Signup(ctx *gin.Context) {
 		})
 	}
 
-	err = publisher.UserRegistered(body.Username)
+	p, err := producers.NewUserRegisteredProducer(utils.Brokers)
 	if err != nil {
-		fmt.Printf("error publishing user registered event: %v", err)
+		log.Panic("error creating registration producer")
 	}
+	err = p.Produce(user)
+	if err != nil {
+		log.Panic("error producing user registration event.")
+	}
+	defer p.Producer.Close()
+
 
 	ctx.JSON(http.StatusOK, gin.H{})
 }
 
 func Signin(ctx *gin.Context) {
-	publisher := publishers.NewPublisher(initializers.RmqChannel)
 	//get email and pw
 	var body struct {
 		Email string
@@ -113,10 +119,15 @@ func Signin(ctx *gin.Context) {
 
 	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie("auth", tokenstring, 3600*24*30, "", "", true, true)
-	err = publisher.UserLoggedIn(user.Username)
+	p, err := producers.NewUserLoggedinProducer(utils.Brokers)
 	if err != nil {
-		fmt.Printf("error publishing user login event: %v", err)
+		log.Panic("error creating login producer")
 	}
+	err = p.Produce(user.Username)
+	if err != nil {
+		log.Panic("error producing user login event.")
+	}
+	defer p.Producer.Close()
 	// send back
 	ctx.JSON(http.StatusOK, gin.H{
 		"email": user.Email,
@@ -125,7 +136,6 @@ func Signin(ctx *gin.Context) {
 }
 
 func Signout(ctx *gin.Context) {
-	publisher := publishers.NewPublisher(initializers.RmqChannel)
 	// Delete the "auth" cookie
 	ctx.SetCookie("auth", "", -1, "/", "", true, true)
 	
@@ -137,12 +147,17 @@ func Signout(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
 			return
 		}
-		err := publisher.UserSignedout(username)
+		p, err := producers.NewUserSignedoutProducer(utils.Brokers)
 		if err != nil {
-		fmt.Printf("error publishing user logout event: %v", err)
+			log.Panic("error creating logout producer")
 		}
-		ctx.Set("currentUser", nil)
-	}
+		err = p.Produce(username)
+		if err != nil {
+			log.Panic("error producing user logout event.")
+		}
+		defer p.Producer.Close()
+			ctx.Set("currentUser", nil)
+		}
 	ctx.Set("currentUserToken", nil)
 	
 	// Respond to the client

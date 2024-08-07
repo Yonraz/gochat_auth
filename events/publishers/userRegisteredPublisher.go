@@ -6,5 +6,5 @@ import (
 
 func (p *Publisher) UserRegistered(username string) error {
 	body := map[string]string{"username": username}
-	return p.Publish(constants.UserEventsExchange, constants.UserRegisteredKey, body)
+	return p.Publish(constants.UserEventsExchange, constants.UserRegistered, body)
 }

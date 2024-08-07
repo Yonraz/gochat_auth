@@ -10,7 +10,7 @@ import (
 func DeclareAndBindQueue(
 	channel *amqp.Channel,
 	queueName constants.Queues,
-	routingKey constants.RoutingKey,
+	routingKey constants.Topic,
 	exchangeName constants.Exchange,
 	durable bool,
 	autoDelete bool,
@@ -48,7 +48,7 @@ func DeclareQueues(channel *amqp.Channel) error {
 	err := DeclareAndBindQueue(
 		channel,
 		constants.UserRegistrationQueue,
-		constants.UserRegisteredKey,
+		constants.UserRegistered,
 		constants.UserEventsExchange,
 		true,
 		false,
@@ -63,7 +63,7 @@ func DeclareQueues(channel *amqp.Channel) error {
 	err = DeclareAndBindQueue(
 		channel,
 		constants.UserLoginQueue,
-		constants.UserLoggedInKey,
+		constants.UserLoggedIn,
 		constants.UserEventsExchange,
 		true,
 		false,
@@ -77,7 +77,7 @@ func DeclareQueues(channel *amqp.Channel) error {
 	err = DeclareAndBindQueue(
 		channel,
 		constants.UserSignoutQueue,
-		constants.UserSignedoutKey,
+		constants.UserSignedout,
 		constants.UserEventsExchange,
 		true,
 		false,

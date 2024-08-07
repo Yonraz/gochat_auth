@@ -16,7 +16,7 @@ func NewPublisher(channel *amqp.Channel) *Publisher {
 	return &Publisher{channel: channel}
 }
 
-func (p *Publisher) Publish(exchange constants.Exchange, routingKey constants.RoutingKey, body interface{}) error {
+func (p *Publisher) Publish(exchange constants.Exchange, routingKey constants.Topic, body interface{}) error {
 	bodyBytes, err := json.Marshal(body)
 
 	if err != nil {
