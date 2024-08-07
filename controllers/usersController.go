@@ -13,6 +13,10 @@ import (
 	"github.com/yonraz/gochat_auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
+type ErrorResponse struct {
+    Errors []string `json:"errors"`
+}
+
 
 func Signup(ctx *gin.Context) {
 	publisher := publishers.NewPublisher(initializers.RmqChannel) 
@@ -24,18 +28,20 @@ func Signup(ctx *gin.Context) {
 	}
 
 	if ctx.Bind(&body) != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to read body",
-		})
+		response := &ErrorResponse{
+			Errors: []string{"Please use valid email, username and password"},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	// hash pw
 	hashed, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to hash password",
-		})
+		response := &ErrorResponse{
+			Errors: []string{"The server encountered an error, please try again"},
+		}
+		ctx.JSON(http.StatusInternalServerError, response)
 
 		return
 	}
@@ -44,9 +50,11 @@ func Signup(ctx *gin.Context) {
 	user := models.User{Email: body.Email, Password: string(hashed), Username: body.Username}
 	result := initializers.DB.Create(&user)
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Email or user name already exists",
-		})
+		response := &ErrorResponse{
+			Errors: []string{"Email or user name already exists"},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
 	}
 
 	err = publisher.UserRegistered(body.Username)
@@ -66,9 +74,10 @@ func Signin(ctx *gin.Context) {
 	}
 
 	if ctx.Bind(&body) != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to read body",
-		})
+		response := &ErrorResponse{
+			Errors: []string{"Please enter valid email and password values."},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
 
 		return
 	}
@@ -77,20 +86,22 @@ func Signin(ctx *gin.Context) {
 	initializers.DB.First(&user, "email = ?", body.Email)
 
 	if user.ID == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid email or password",
-		})
-
+		response := &ErrorResponse{
+			Errors: []string{"Please enter valid email and password values."},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		
 		return
 	}
 
 	// compare password with pw hash
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid email or password",
-		})
-
+		response := &ErrorResponse{
+			Errors: []string{"Please enter valid email and password values."},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		
 		return
 	}
 
@@ -104,10 +115,11 @@ func Signin(ctx *gin.Context) {
 	tokenstring, err := token.SignedString([]byte(JWT_KEY))
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to create token",
-		})
-
+		response := &ErrorResponse{
+			Errors: []string{"Please enter valid email and password values."},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		
 		return
 	}
 
@@ -134,7 +146,10 @@ func Signout(ctx *gin.Context) {
 	if exists {
 		username, ok := user.(string)
 		if !ok {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
+			response := &ErrorResponse{
+				Errors: []string{"Please enter valid email and password values."},
+				}
+			ctx.JSON(http.StatusBadRequest, response)
 			return
 		}
 		err := publisher.UserSignedout(username)
@@ -152,9 +167,11 @@ func Signout(ctx *gin.Context) {
 func CurrentUser(ctx *gin.Context) {
 	username, exists := ctx.Get("currentUser")
 	if !exists {
-		ctx.JSON(http.StatusNotFound, gin.H{
-		"message": "No user found",
-		})
+		response := &ErrorResponse{
+			Errors: []string{"No user found."},
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Logged in",
